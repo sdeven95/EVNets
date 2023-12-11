@@ -1,0 +1,209 @@
+Common:
+  name: undefined
+  Common:
+    seed: 0
+    debug_mode: False
+    config_file: None
+    result_loc: results
+    run_label: run_1
+    exp_loc: None
+    resume_loc: None
+    auto_resume: True
+    model_state_loc: None
+    model_ema_state_loc: None
+    channel_last: False
+    mixed_precision: False
+    grad_clip: None
+    set_grad_to_none: True
+    accum_freq: 1
+    accum_after_epoch: 0
+    log_freq: 500
+    tensorboard_logging: False
+    bolt_logging: False
+    inference_modality: image
+    enable_coreml_compatible_module: False
+  DDP:
+    enable: False
+    rank: 0
+    start_rank: 0
+    world_size: None
+    use_distributed: False
+    dist_url: None
+    dist_port: 30786
+    spawn: True
+    backend: nccl
+    find_unused_params: False
+  Dev:
+    device: cpu
+    num_gpus: 0
+    device_id: 0
+    num_cpus: 1
+Transform:
+  name: undefined
+  RandomCropResize:
+    enable: True
+    size: [224, 224]
+    scale: [0.08, 1.0]
+    ratio: [0.75, 1.3333333333333333]
+    interpolation: bilinear
+  RandomHorizontalFlip:
+    enable: True
+    p: 0.5
+  Resize:
+    enable: True
+    size: [ 256, 256 ]
+    interpolation: bilinear
+  CenterCrop:
+    enable: True
+    size: [224, 224]
+Sampler:
+  name: BatchSampler
+  SampleEfficientTraining:
+    enable: False
+    sample_confidence: 0.5
+    find_easy_samples_every_k_epochs: 5
+    min_sample_frequency: 5
+  BatchSampler:
+    train_batch_size: 8
+    val_batch_size: 8
+    eval_batch_size: 8
+    crop_size_width: 224
+    crop_size_height: 224
+    num_repeats: 1
+  BatchSamplerDDP:
+    train_batch_size: 8
+    val_batch_size: 8
+    eval_batch_size: 8
+    crop_size_width: 224
+    crop_size_height: 224
+    num_repeats: 1
+Collate:
+  train: food_collate_fn
+  val: food_collate_fn
+  eval: food_collate_fn
+Dataset:
+  name: FoodDataset
+  FoodDataset:
+    root_train: "D:\\PythonProject\\Food172\\images"
+    train_index_file: "simple_train_full.txt"
+    train_index_offset: 0
+    root_val: "D:\\PythonProject\\Food172\\images"
+    val_index_file: "simple_test_full.txt"
+    val_index_offset: 0
+    root_eval: "D:\\PythonProject\\Food172\\images"
+    eval_index_file: "simple_test_full.txt"
+    eval_index_offset: 0
+    workers: 2
+    dali_workers: -1
+    persistent_workers: False
+    pin_memory: False
+    prefetch_factor: 2
+    img_dtype: float
+    cache_images_on_ram: False
+    cache_limit: 80.0
+    decode_data_on_gpu: False
+    sampler_type: batch
+    is_training: True
+    is_evaluation: False
+    crop_ratio: 0.875
+Activation:
+  name: ReLU
+  ReLU:
+    inplace: True
+Norm:
+  name: BatchNorm2d
+  BatchNorm2d:
+    eps: 1e-05
+    momentum: 0.1
+    affine: True
+    track_running_stats: True
+Layer:
+  name: undefined
+Model:
+  name: ClassificationModel
+ClassificationModel:
+  name: ResNet
+  ResNet:
+    n_classes: 1000
+    classifier_dropout: 0.0
+    freeze_batch_norm: False
+    global_pool: mean
+    pretrained: None
+    n_pretrained_classes: 1000
+    finetune_pretrained_model: False
+    conv_init: kaiming_normal
+    linear_init: normal
+    conv_init_std_dev: 0.01
+    linear_init_std_dev: 0.01
+    group_linear_init_std_dev: 0.01
+    depth: 50
+    dropout: 0.0
+EMAConfiture:
+  name: EMAWraper
+  EMAWraper:
+    enable: True
+    momentum: 0.0001
+    copy_at_epoch: -1
+Optimizer:
+  name: SGD
+  SGD:
+    weight_decay: 1.e-4
+    no_decay_bn_filter_bias: True
+    lr: 0.1
+    momentum: 0.9
+    dampening: 0.0
+    nesterov: False
+Scheduler:
+  name: Cosine
+  Cosine:
+    lr_multipliers: None
+    is_iteration_based: False
+    max_epochs: 150
+    max_iterations: 150000
+    warmup_iterations: 7500
+    warmup_init_lr: 0.05
+    adjust_period_for_epochs: False
+    noise_type: None
+    noise_range_percent: [0.42, 0.9]
+    max_noise_percent: 0.67
+    noise_seed: 42
+    min_lr: 2.e-4
+    max_lr: 0.4
+Loss:
+  name: CrossEntropy
+  CrossEntropy:
+    use_class_weights: False
+    label_smoothing: 0.1
+    ignore_index: -1
+Metric:
+  name: Metric
+  Metric:
+    train_metric_names: ['loss']
+    val_metric_names: ['loss', 'top1', 'top5']
+    checkpoint_metric: top1
+    checkpoint_metric_max: True
+    k_best_checkpoints: 5
+    save_all_checkpoints: False
+    terminate_ratio: 100.0
+Engine:
+  name: undefined
+  Benchmark:
+    batch_size: 1
+    warmup_iterations: 10
+    n_iterations: 100
+    use_jit_model: False
+  Conversion:
+    ckpt_path: None
+    coreml_extn: mlmodel
+    input_image_path: None
+    bucket_name: None
+    task_id: None
+    viewers: None
+LossLandscape:
+  name: undefined
+  LossLandscape:
+    n_points: 32
+    min_x: -1.0
+    max_x: 1.0
+    min_y: -1.0
+    max_y: 1.0

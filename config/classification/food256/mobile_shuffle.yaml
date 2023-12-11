@@ -1,0 +1,219 @@
+Common:
+  name: undefined
+  Common:
+    seed: 0
+    debug_mode: False
+    config_file: None
+    result_loc: results
+    run_label: run_1
+    exp_loc: None
+    resume_loc: None
+    auto_resume: True
+    model_state_loc: None
+    model_ema_state_loc: None
+    channel_last: True
+    mixed_precision: True
+    grad_clip: 10
+    set_grad_to_none: True
+    accum_freq: 1
+    accum_after_epoch: 0
+    log_freq: 500
+    tensorboard_logging: False
+    bolt_logging: False
+    inference_modality: image
+    enable_coreml_compatible_module: False
+  DDP:
+    enable: True
+    rank: 0
+    start_rank: 0
+    world_size: 1
+    use_distributed: True
+    dist_url: None
+    dist_port: 30786
+    spawn: True
+    backend: nccl
+    find_unused_params: False
+  Dev:
+    device: cuda
+    num_gpus: 1
+    device_id: 0
+    num_cpus: 1
+Transform:
+  name: undefined
+  RandomCropResize:
+    enable: True
+    size: [256, 256]
+    scale: [0.08, 1.0]
+    ratio: [0.75, 1.3333333333333333]
+    interpolation: bilinear
+  RandomHorizontalFlip:
+    enable: True
+    p: 0.5
+  RandAugment:
+    enable: true
+  RandomErasing:
+    enable: true
+    p: 0.25
+  RandomMixup:
+    enable: true
+    alpha: 0.2
+  RandomCutmix:
+    enable: true
+    alpha: 1.0
+  Resize:
+    enable: True
+    size: [ 288, 288 ]
+    interpolation: bilinear
+  CenterCrop:
+    enable: True
+    size: [256, 256]
+Sampler:
+  name: BatchSamplerDDP
+  SampleEfficientTraining:
+    enable: False
+    sample_confidence: 0.5
+    find_easy_samples_every_k_epochs: 5
+    min_sample_frequency: 5
+  BatchSampler:
+    train_batch_size: 128
+    val_batch_size: 128
+    eval_batch_size: 128
+    crop_size_width: 256
+    crop_size_height: 256
+    num_repeats: 1
+  BatchSamplerDDP:
+    train_batch_size: 128
+    val_batch_size: 128
+    eval_batch_size: 128
+    crop_size_width: 256
+    crop_size_height: 256
+    num_repeats: 1
+Collate:
+  train: food_collate_fn
+  val: food_collate_fn
+  eval: food_collate_fn
+Dataset:
+  name: FoodDataset
+  FoodDataset:
+    root_train: "/home/yang/data/Food256/images"
+    train_index_file: "train_dir.txt"
+    train_index_offset: -1
+    root_val: "/home/yang/data/Food256/images"
+    val_index_file: "test_dir.txt"
+    val_index_offset: -1
+    root_eval: "/home/yang/data/Food256/images"
+    eval_index_file: "test_full.txt"
+    eval_index_offset: 0
+    workers: 8
+    dali_workers: -1
+    persistent_workers: True
+    pin_memory: True
+    prefetch_factor: 2
+    img_dtype: float
+    cache_images_on_ram: False
+    cache_limit: 512.0
+    decode_data_on_gpu: False
+    sampler_type: batch
+    is_training: True
+    crop_ratio: 0.875
+Activation:
+  name: Hardswish
+  Hardswish:
+    inplace: True
+Norm:
+  name: BatchNorm2d
+  BatchNorm2d:
+    eps: 1e-05
+    momentum: 0.1
+    affine: True
+    track_running_stats: True
+Layer:
+  name: undefined
+Model:
+  name: ClassificationModel
+ClassificationModel:
+  name: MobileAggregate
+  MobileAggregate:
+    n_classes: 172
+    classifier_dropout: 0.0
+    freeze_batch_norm: False
+    global_pool: mean
+    pretrained: None
+    n_pretrained_classes: 1000
+    finetune_pretrained_model: False
+    conv_init: kaiming_normal
+    linear_init: normal
+    conv_init_std_dev: 0.01
+    linear_init_std_dev: 0.01
+    group_linear_init_std_dev: 0.01
+    dropout: 0.0
+    width_multiplier: 1.0
+EMAConfiture:
+  name: EMAWraper
+  EMAWraper:
+    enable: True
+    momentum: 0.0001
+    copy_at_epoch: -1
+Optimizer:
+  name: SGD
+  SGD:
+    weight_decay: 4.e-5
+    no_decay_bn_filter_bias: True
+    lr: 0.1
+    momentum: 0.9
+    dampening: 0.0
+    nesterov: False
+Scheduler:
+  name: Cosine
+  Cosine:
+    lr_multipliers: None
+    is_iteration_based: False
+    max_epochs: 300
+    max_iterations: 150000
+    warmup_iterations: 3000
+    warmup_init_lr: 0.1
+    adjust_period_for_epochs: False
+    noise_type: None
+    noise_range_percent: [0.42, 0.9]
+    max_noise_percent: 0.67
+    noise_seed: 42
+    min_lr: 4.e-4
+    max_lr: 0.8
+Loss:
+  name: CrossEntropy
+  CrossEntropy:
+    use_class_weights: False
+    label_smoothing: 0.1
+    ignore_index: -1
+Metric:
+  name: Metric
+  Metric:
+    train_metric_names: ['loss']
+    val_metric_names: ['loss', 'top1', 'top5']
+    checkpoint_metric: top1
+    checkpoint_metric_max: True
+    k_best_checkpoints: 5
+    save_all_checkpoints: False
+    terminate_ratio: 100.0
+Engine:
+  name: undefined
+  Benchmark:
+    batch_size: 1
+    warmup_iterations: 10
+    n_iterations: 100
+    use_jit_model: False
+  Conversion:
+    ckpt_path: None
+    coreml_extn: mlmodel
+    input_image_path: None
+    bucket_name: None
+    task_id: None
+    viewers: None
+LossLandscape:
+  name: undefined
+  LossLandscape:
+    n_points: 32
+    min_x: -1.0
+    max_x: 1.0
+    min_y: -1.0
+    max_y: 1.0
