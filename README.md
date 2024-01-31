@@ -26,8 +26,7 @@ Note, Mobile Aggregate Net and SoftReLU come from the following paper:
 
    * Lightweight food recognition via aggregation block and feature encoding
 
-the paper provides an encoding block similar to positional encoding but with almost negligible parameters and computation.
-you can add this block to any model to get smaller network in depth and number of parameters with pretty much the same performance.
+the paper provides an encoding block similar to positional encoding but with almost negligible parameters and computation which is especially effective to food recognition. you can add this block to any model to get smaller network in depth and number of parameters with pretty much the same performance.
 the paper also proposes a new activation function, it's effective especially for small or medium-sized network and enables faster network convergence.
 
 And Mobile Global Shuffle Net come from the following paper:
